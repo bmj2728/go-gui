@@ -2,10 +2,17 @@ package utils
 
 import (
 	"image"
+	"sync"
 
 	"gioui.org/layout"
 	"gioui.org/op/paint"
 )
+
+type CurrentImage struct {
+	img       image.Image
+	mu        sync.Mutex
+	isLoading bool
+}
 
 func DrawImage(gtx layout.Context, img image.Image) layout.Dimensions {
 	// Convert to paint.ImageOp

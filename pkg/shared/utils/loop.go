@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"image"
+	//"image"
 	"log"
 
 	"go-gui/pkg/shared/handlers"
@@ -15,14 +15,15 @@ import (
 )
 
 func Run(w *app.Window) error {
-	// UI state
+	// button
 	var fetchButton widget.Clickable
-	var currentImage image.Image
-
+	// thread-safe image wrapper
+	var currentImage CurrentImage
 	// Theme for material widgets
 	th := material.NewTheme()
 
 	var ops op.Ops
+
 	for {
 		switch e := w.Event().(type) {
 		case app.DestroyEvent:
@@ -32,16 +33,21 @@ func Run(w *app.Window) error {
 			gtx := app.NewContext(&ops, e)
 
 			// Handle button click
-			if fetchButton.Clicked(gtx) {
-				go func() {
+			if fetchButton.Clicked(gtx) && !currentImage.isLoading {
+				go func(wind *app.Window) {
 					img, err := handlers.HandleButtonClick()
+					currentImage.mu.Lock()
+					currentImage.isLoading = true
 					if err != nil {
 						log.Printf("Error handling button click: %v", err)
 					} else {
-						currentImage = img
+						currentImage.img = img
 					}
+					currentImage.isLoading = false
+					currentImage.mu.Unlock()
+					wind.Invalidate()
+				}(w)
 
-				}()
 			}
 
 			// Layout
@@ -60,16 +66,17 @@ func Run(w *app.Window) error {
 				// Image display area
 				layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
 					return layout.UniformInset(unit.Dp(16)).Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-						if currentImage == nil {
+						if currentImage.img == nil {
 							// Show placeholder
 							return layout.Dimensions{Size: gtx.Constraints.Min}
 						}
-						return DrawImage(gtx, currentImage)
+						return DrawImage(gtx, currentImage.img)
 					})
 				}),
 			)
 
 			e.Frame(gtx.Ops)
+
 		}
 	}
 }
