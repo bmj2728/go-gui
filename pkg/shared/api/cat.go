@@ -4,6 +4,9 @@ import (
 	"bytes"
 	"encoding/json"
 	"image"
+	_ "image/gif"
+	_ "image/jpeg"
+	_ "image/png"
 	"io"
 	"log"
 	"net/http"
@@ -75,7 +78,7 @@ func RequestRandomCat(timeout time.Duration) (image.Image, *CatMetadata, error) 
 		return nil, nil, err
 	}
 
-	log.Printf("Fetching image: %v+", meta)
+	log.Printf("Fetching image: %v", meta)
 
 	// now get the actual image
 	imgResp, err := http.Get(meta.URL)
@@ -101,7 +104,14 @@ func RequestRandomCat(timeout time.Duration) (image.Image, *CatMetadata, error) 
 		log.Printf("Error decoding image: %v", err)
 		return nil, nil, err
 	}
-	log.Printf("Format: %s+", format)
+
+	mFormat := "image/" + format
+
+	if mFormat == meta.MIMEType {
+		log.Printf("Expected format registered - %s:%s", mFormat, meta.MIMEType)
+	} else {
+		log.Printf("Unexpected format registered: %s:%s", mFormat, meta.MIMEType)
+	}
 
 	return img, &meta, nil
 }
