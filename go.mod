@@ -1,4 +1,4 @@
-module go-gui
+module github.com/bmj2728/catfetch
 
 go 1.25
 

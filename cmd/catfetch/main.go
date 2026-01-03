@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	"go-gui/pkg/shared/ui"
+	"github.com/bmj2728/catfetch/pkg/shared/ui"
 
 	"gioui.org/app"
 	"gioui.org/unit"

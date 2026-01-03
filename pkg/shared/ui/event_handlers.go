@@ -8,7 +8,7 @@ import (
 	"log"
 	"time"
 
-	"go-gui/pkg/shared/api"
+	"github.com/bmj2728/catfetch/pkg/shared/api"
 )
 
 func HandleButtonClick() (image.Image, *api.CatMetadata, error) {

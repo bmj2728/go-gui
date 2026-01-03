@@ -4,7 +4,7 @@ import (
 	//"image"
 	"log"
 
-	"go-gui/pkg/shared/catpic"
+	"github.com/bmj2728/catfetch/pkg/shared/catpic"
 
 	"gioui.org/app"
 	"gioui.org/layout"
