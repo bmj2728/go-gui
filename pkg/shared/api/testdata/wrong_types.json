@@ -1,0 +1,7 @@
+{
+  "id": 12345,
+  "tags": "not_an_array",
+  "created_at": "invalid_date_format",
+  "url": 999,
+  "mimetype": true
+}

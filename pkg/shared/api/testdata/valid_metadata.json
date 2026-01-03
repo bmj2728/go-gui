@@ -1,0 +1,7 @@
+{
+  "id": "test_cat_001",
+  "tags": ["cute", "fluffy", "tabby"],
+  "created_at": "2025-01-01T12:00:00Z",
+  "url": "https://example.com/test_cat.jpg",
+  "mimetype": "image/jpeg"
+}
