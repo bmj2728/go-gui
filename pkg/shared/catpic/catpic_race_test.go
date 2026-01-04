@@ -65,14 +65,16 @@ func TestCatPic_ConcurrentLoadingState(t *testing.T) {
 
 	catPic := NewCatImage(nil)
 
-	const numGoroutines = 100
+	const numSetters = 33
+	const numClearers = 33
+	const numReaders = 34
 	const opsPerGoroutine = 1000
 
 	var wg sync.WaitGroup
-	wg.Add(numGoroutines)
+	wg.Add(numSetters + numClearers + numReaders)
 
-	// Start goroutines that set/clear loading
-	for i := 0; i < numGoroutines/3; i++ {
+	// Start goroutines that set loading
+	for i := 0; i < numSetters; i++ {
 		go func() {
 			defer wg.Done()
 			for j := 0; j < opsPerGoroutine; j++ {
@@ -81,7 +83,8 @@ func TestCatPic_ConcurrentLoadingState(t *testing.T) {
 		}()
 	}
 
-	for i := 0; i < numGoroutines/3; i++ {
+	// Start goroutines that clear loading
+	for i := 0; i < numClearers; i++ {
 		go func() {
 			defer wg.Done()
 			for j := 0; j < opsPerGoroutine; j++ {
@@ -91,7 +94,7 @@ func TestCatPic_ConcurrentLoadingState(t *testing.T) {
 	}
 
 	// Start goroutines that read loading state
-	for i := 0; i < numGoroutines/3; i++ {
+	for i := 0; i < numReaders; i++ {
 		go func() {
 			defer wg.Done()
 			for j := 0; j < opsPerGoroutine; j++ {
