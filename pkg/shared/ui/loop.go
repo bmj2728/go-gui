@@ -63,15 +63,16 @@ func Run(w *app.Window) error {
 
 			// Layout UI components
 			layout.Flex{
-				Axis:      layout.Vertical,
-				Spacing:   layout.SpaceStart,
-				Alignment: layout.Middle,
+				Axis:    layout.Vertical,
+				Spacing: layout.SpaceStart,
 			}.Layout(gtx,
 				layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-					return layoutButton(gtx, th, &fetchButton, 2)
+					return layout.Center.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+						return layoutButton(gtx, th, &fetchButton, 12)
+					})
 				}),
 				layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
-					return layoutImageDisplay(gtx, &currentImage, unit.Dp(2))
+					return layoutImageDisplay(gtx, &currentImage, 24)
 				}),
 			)
 
@@ -121,20 +122,5 @@ func layoutImageDisplay(gtx layout.Context, img *catpic.CatPic, insetPixels unit
 }
 
 func layoutImageDisplayDims(gtx layout.Context, img *catpic.CatPic, inset layout.Inset) layout.Dimensions {
-	return inset.Layout(gtx,
-		func(gtx layout.Context) layout.Dimensions {
-
-			if img.GetImage() == nil {
-				// Show placeholder (empty space)
-				return layout.Dimensions{
-					Size: image.Point{
-						X: gtx.Constraints.Max.X,
-						Y: gtx.Constraints.Max.Y,
-					},
-				}
-			}
-
-			return img.Draw(gtx)
-
-		})
+	return inset.Layout(gtx, img.Draw)
 }

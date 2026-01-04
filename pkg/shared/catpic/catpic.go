@@ -5,8 +5,8 @@ import (
 	"sync"
 
 	"gioui.org/layout"
-	"gioui.org/op/clip"
 	"gioui.org/op/paint"
+	"gioui.org/widget"
 )
 
 type CatPic struct {
@@ -54,24 +54,12 @@ func (p *CatPic) ClearLoading() {
 func (p *CatPic) Draw(gtx layout.Context) layout.Dimensions {
 	img := p.GetImage()
 	if img == nil {
-		// Could render a placeholder or loading state here
 		return layout.Dimensions{Size: gtx.Constraints.Min}
 	}
 
-	bounds := img.Bounds()
-	imgW, imgH := float32(bounds.Dx()), float32(bounds.Dy())
-	maxW, maxH := float32(gtx.Constraints.Max.X), float32(gtx.Constraints.Max.Y)
-
-	scale := min(maxW/imgW, maxH/imgH)
-	finalW, finalH := int(imgW*scale), int(imgH*scale)
-
-	// Clip to the scaled bounds
-	defer clip.Rect{Max: image.Pt(finalW, finalH)}.Push(gtx.Ops).Pop()
-
-	imgOp := paint.NewImageOp(img)
-	imgOp.Filter = paint.FilterLinear
-	imgOp.Add(gtx.Ops)
-	paint.PaintOp{}.Add(gtx.Ops)
-
-	return layout.Dimensions{Size: image.Pt(finalW, finalH)}
+	return widget.Image{
+		Src:      paint.NewImageOp(img),
+		Fit:      widget.Contain,
+		Position: layout.Center,
+	}.Layout(gtx)
 }
