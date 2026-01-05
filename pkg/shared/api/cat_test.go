@@ -66,12 +66,10 @@ func TestRequestRandomCat_Success(t *testing.T) {
 
 			// Temporarily replace the base URL for testing
 			oldBaseURL := caasBaseURL
-			oldEndpoint := caasCatEndpoint
 			defer func() {
 				// Can't actually restore since they're constants
 				// In a real scenario, we'd refactor to use dependency injection
 				_ = oldBaseURL
-				_ = oldEndpoint
 			}()
 
 			// Since we can't override constants, we'll test with the mock servers

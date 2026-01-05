@@ -2,7 +2,10 @@ module github.com/bmj2728/catfetch
 
 go 1.25
 
-require gioui.org v0.9.0
+require (
+	gioui.org v0.9.0
+	github.com/g4s8/hexcolor v1.2.0
+)
 
 require (
 	gioui.org/shader v1.0.8 // indirect

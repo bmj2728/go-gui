@@ -13,44 +13,10 @@ import (
 	"time"
 )
 
-const (
-	caasBaseURL        = "https://cataas.com/"
-	caasCatEndpoint    = "cat"
-	caasCatGIFEndpoint = "cat/gif"
-)
-
-type CatMetadata struct {
-	ID        string    `json:"id"`
-	Tags      []string  `json:"tags"`
-	CreatedAt time.Time `json:"created_at"`
-	URL       string    `json:"url"`
-	MIMEType  string    `json:"mimetype"`
-}
-
-func (cm *CatMetadata) GetID() string {
-	return cm.ID
-}
-
-func (cm *CatMetadata) GetTags() []string {
-	return cm.Tags
-}
-
-func (cm *CatMetadata) GetCreatedAt() time.Time {
-	return cm.CreatedAt
-}
-
-func (cm *CatMetadata) GetURL() string {
-	return cm.URL
-}
-
-func (cm *CatMetadata) GetMIMEType() string {
-	return cm.MIMEType
-}
-
 func RequestRandomCat(timeout time.Duration) (image.Image, *CatMetadata, error) {
 	// make some stuff
 	bodyReader := bytes.NewReader(make([]byte, 0))
-	reqURL := caasBaseURL + caasCatEndpoint + "?json=true" //first get the metadata in json format
+	reqURL := caasBaseURL + caasQueryStart + caasReturnJSON //first get the metadata in json format
 	client := &http.Client{Timeout: timeout}
 	var meta CatMetadata
 
