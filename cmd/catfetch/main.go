@@ -3,15 +3,23 @@ package main
 import (
 	"log"
 	"os"
-
-	"github.com/bmj2728/catfetch/pkg/shared/ui"
+	"time"
 
 	"gioui.org/app"
 	"gioui.org/unit"
+	"github.com/bmj2728/catfetch/pkg/shared/api"
+	_ "github.com/bmj2728/catfetch/pkg/shared/api"
+	"github.com/bmj2728/catfetch/pkg/shared/ui"
 )
 
 func main() {
 
+	// Fetch available tags
+	go func() {
+		api.FetchCAASTags(30 * time.Second)
+	}()
+
+	// Make a window and run the loop
 	go func() {
 		// Create window
 		w := new(app.Window)
@@ -22,5 +30,7 @@ func main() {
 		}
 		os.Exit(0)
 	}()
+
 	app.Main()
+
 }

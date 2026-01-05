@@ -3,6 +3,7 @@ package api
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -13,22 +14,21 @@ const (
 	caasTags = "https://cataas.com/api/tags?json=true" //will return valid tags
 )
 
-var AvailableTags = FetchCAASTags(30)
+var AvailableTags = CAASTags{}
 
 type CAASTags []string
 
-func FetchCAASTags(timeout time.Duration) *CAASTags {
-	var results CAASTags
+func FetchCAASTags(timeout time.Duration) {
 	bodyReader := bytes.NewReader(make([]byte, 0))
 	client := &http.Client{Timeout: timeout}
 	req, err := http.NewRequest(http.MethodGet, caasTags, bodyReader)
 	if err != nil {
-		return &results
+		fmt.Println(err)
 	}
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return &results
+		fmt.Println(err)
 	}
 	// clean up when done
 	defer func(body io.ReadCloser) {
@@ -38,10 +38,9 @@ func FetchCAASTags(timeout time.Duration) *CAASTags {
 		}
 	}(resp.Body)
 
-	err = json.NewDecoder(resp.Body).Decode(&results)
+	err = json.NewDecoder(resp.Body).Decode(&AvailableTags)
 	if err != nil {
-		return &results
+		fmt.Println(err)
 	}
 
-	return &results
 }

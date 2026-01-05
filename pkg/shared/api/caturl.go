@@ -71,6 +71,25 @@ type CatURL struct {
 	params       []string // store params
 }
 
+/*
+	valid endpoints:
+	basicCalls:
+		- caasBaseURL
+		- caasBaseURL/ID
+		- caasBaseURL/TAG
+	withTextOverlay:
+		- caasBaseURL/caasSaysEndpoint/escaped%20text%21
+		- caasBaseURL/ID/caasSaysEndpoint/escaped%20text%21
+		- caasBaseURL/TAG/caasSaysEndpoint/escaped%20text%21
+	queryCalls:
+		- caasBaseURL + caasQueryStart + params
+		- caasBaseURL/ID + caasQueryStart + params
+		- caasBaseURL/TAG + caasQueryStart + params
+		- caasBaseURL/caasSaysEndpoint/escaped%20text%21 + caasQueryStart + params
+		- caasBaseURL/ID/caasSaysEndpoint/escaped%20text%21 + caasQueryStart + params
+		- caasBaseURL/TAG/caasSaysEndpoint/escaped%20text%21 + caasQueryStart + params
+*/
+
 func NewCatURL(baseURL string) *CatURL {
 	return &CatURL{
 		baseURL: baseURL,
@@ -100,7 +119,7 @@ func (c *CatURL) WithID(id string) *CatURL {
 
 func (c *CatURL) WithTag(tag string) *CatURL {
 
-	if !slices.Contains(*AvailableTags, tag) {
+	if !slices.Contains(AvailableTags, tag) {
 		return &CatURL{
 			baseURL:      c.baseURL,
 			catID:        c.catID,
@@ -730,22 +749,3 @@ func (c *CatURL) Generate() (string, error) {
 	return b.String(), nil
 
 }
-
-/*
-	valid endpoints:
-	basicCalls:
-		- caasBaseURL
-		- caasBaseURL/ID
-		- caasBaseURL/TAG
-	withTextOverlay:
-		- caasBaseURL/caasSaysEndpoint/escaped%20text%21
-		- caasBaseURL/ID/caasSaysEndpoint/escaped%20text%21
-		- caasBaseURL/TAG/caasSaysEndpoint/escaped%20text%21
-	queryCalls:
-		- caasBaseURL + caasQueryStart + params
-		- caasBaseURL/ID + caasQueryStart + params
-		- caasBaseURL/TAG + caasQueryStart + params
-		- caasBaseURL/caasSaysEndpoint/escaped%20text%21 + caasQueryStart + params
-		- caasBaseURL/ID/caasSaysEndpoint/escaped%20text%21 + caasQueryStart + params
-		- caasBaseURL/TAG/caasSaysEndpoint/escaped%20text%21 + caasQueryStart + params
-*/
