@@ -145,8 +145,8 @@ jobs:
             echo "First release - no changelog"
             echo "body=First release of catfetch" >> $GITHUB_OUTPUT
           else
-            # Generate changelog from commits
-            CHANGELOG=$(git log ${PREV_TAG}..HEAD --pretty=format:"- %s (%h)" --no-merges | grep -v -E "^- (docs:|test:|chore:|Merge pull request|Merge branch)")
+            # Generate changelog from commits (|| true prevents grep from failing on no matches)
+            CHANGELOG=$(git log ${PREV_TAG}..HEAD --pretty=format:"- %s (%h)" --no-merges | grep -v -E "^- (docs:|test:|chore:|Merge pull request|Merge branch)" || true)
             if [ -z "$CHANGELOG" ]; then
               CHANGELOG="- Various improvements and bug fixes"
             fi
