@@ -162,7 +162,7 @@ func (c *CatURL) WithTag(tag string) *CatURL {
 }
 
 func (c *CatURL) WithSays(txt string) *CatURL {
-	cleaned := url.QueryEscape(txt)
+	cleaned := url.PathEscape(txt)
 	return &CatURL{
 		baseURL:      c.baseURL,
 		hasID:        c.hasID,
@@ -894,6 +894,79 @@ func (c *CatURL) Generate() (string, error) {
 
 }
 
-//func ParseCatURL(catURL string) (*CatURL, error) {
-//
-//}
+func ParseCatURL(catURL string) (*CatURL, error) {
+
+	// let's validate it really is a URL
+	parsedURL, err := url.Parse(catURL)
+	if err != nil {
+		return nil, err
+	}
+
+	// base url validation
+	if parsedURL.Scheme != "https" {
+		return nil, fmt.Errorf("invalid URL scheme %s", parsedURL.Scheme)
+	}
+	if parsedURL.Host != "cataas.com" {
+		return nil, fmt.Errorf("invalid URL host %s", parsedURL.Host)
+	}
+	if !strings.HasPrefix(parsedURL.Path, "/cat") {
+		return nil, fmt.Errorf("invalid URL path %s", parsedURL.Path)
+	}
+
+	// we can get started now
+	cu := NewCatURL()
+
+	// split the path and validate the # parts
+	pathParts := strings.Split(parsedURL.Path, "/")
+	if len(pathParts) < 2 || len(pathParts) > 5 {
+		return nil, fmt.Errorf("invalid URL path %s", parsedURL.Path)
+	}
+
+	// possible values for each index
+	// 0 & 1 = "" & cat
+	// 2 = says || id || tag
+	// 3 = says || says-text
+	// 4 = says-text
+
+	// When we have 4 or 5, we must have a says where the last is text less than 4 cannot be says
+	if len(pathParts) == 5 || len(pathParts) == 4 {
+		cu.hasSays = true
+		cu.saysText = pathParts[len(pathParts)-1]
+	}
+
+	//if we have 3 or 5 idx 2 is a tag or an id - if it's in available tags, it's a tag, otherwise must be an ID
+	if (len(pathParts) == 3 || len(pathParts) == 5) && slices.Contains(AvailableTags, pathParts[2]) {
+		cu.hasTag = true
+		cu.tag = pathParts[2]
+	} else if len(pathParts) == 3 || len(pathParts) == 5 {
+		cu.hasID = true
+		cu.catID = pathParts[2]
+	}
+
+	// Now the query
+	q := parsedURL.Query()
+
+	// split on &
+	qp := strings.Split(parsedURL.RawQuery, "&")
+
+	// check if custom filter applied
+	if q.Get("filter") == "custom" {
+		cu.customFilter = true
+	}
+
+	// check if the format is specified - it will be the last param, drop it
+	if q.Has("json") {
+		cu.asJSON = true
+		qp = qp[:len(qp)-1]
+	}
+	if q.Has("html") {
+		cu.asHTML = true
+		qp = qp[:len(qp)-1]
+	}
+
+	// now we can tag our params
+	cu.params = qp
+
+	// and return
+	return cu, nil
+}
