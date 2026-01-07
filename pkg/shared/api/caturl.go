@@ -842,7 +842,7 @@ func (c *CatURL) Generate() (string, error) {
 	if c.hasSays && c.saysText == "" {
 		return "", ErrSaysNoText
 	}
-	if c.hasTag && slices.Contains(AvailableTags, c.tag) {
+	if c.hasTag && !slices.Contains(AvailableTags, c.tag) {
 		return "", ErrInvalidTag
 	}
 	if c.asHTML && c.asJSON {
@@ -893,3 +893,7 @@ func (c *CatURL) Generate() (string, error) {
 	return b.String(), nil
 
 }
+
+//func ParseCatURL(catURL string) (*CatURL, error) {
+//
+//}
