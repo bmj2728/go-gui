@@ -1,26 +1,19 @@
 package catdb
 
 import (
+	"encoding/json"
 	"fmt"
 	"hash/fnv"
 	"log"
-	"strings"
-	"time"
 
 	"github.com/bmj2728/catfetch/pkg/shared/metadata"
 	"go.etcd.io/bbolt"
 )
 
 const (
-	bucketCats         = "cats"
-	bucketMetadata     = "metadata"
-	bucketData         = "data"
-	dbKeyImgData       = "img_data"
-	dbKeyMetaId        = "cat_id"
-	dbKeyMetaTags      = "tags"
-	dbKeyMetaCreatedAt = "created_at"
-	dbKeyMetaURL       = "url"
-	dbKeyMetaMIMEType  = "mime_type"
+	bucketCats    = "cats"
+	dbKeyMetadata = "metadata"
+	dbKeyData     = "data"
 )
 
 type CatDB struct {
@@ -69,6 +62,11 @@ func (c *CatDB) AddCatVersion(metadata *metadata.CatMetadata, catData []byte) (s
 		return "", "", err
 	}
 
+	meta, err := json.Marshal(metadata)
+	if err != nil {
+		return "", "", err
+	}
+
 	err = c.db.Update(func(tx *bbolt.Tx) error {
 
 		b := tx.Bucket([]byte(bucketCats))
@@ -80,41 +78,11 @@ func (c *CatDB) AddCatVersion(metadata *metadata.CatMetadata, catData []byte) (s
 		if err != nil {
 			return err
 		}
-		md, err := version.CreateBucketIfNotExists([]byte(bucketMetadata))
+		err = version.Put([]byte(dbKeyMetadata), meta)
 		if err != nil {
 			return err
 		}
-
-		err = md.Put([]byte(dbKeyMetaId), []byte(metadata.ID))
-		if err != nil {
-			return err
-		}
-
-		err = md.Put([]byte(dbKeyMetaTags), []byte(strings.Join(metadata.Tags, ", ")))
-		if err != nil {
-			return err
-		}
-
-		err = md.Put([]byte(dbKeyMetaCreatedAt), []byte(metadata.CreatedAt.Format(time.RFC3339)))
-		if err != nil {
-			return err
-		}
-
-		err = md.Put([]byte(dbKeyMetaURL), []byte(metadata.URL))
-		if err != nil {
-			return err
-		}
-
-		err = md.Put([]byte(dbKeyMetaMIMEType), []byte(metadata.MIMEType))
-		if err != nil {
-			return err
-		}
-
-		data, err := version.CreateBucketIfNotExists([]byte(bucketData))
-		if err != nil {
-			return err
-		}
-		err = data.Put([]byte(dbKeyImgData), catData)
+		err = version.Put([]byte(dbKeyData), catData)
 		if err != nil {
 			return err
 		}
