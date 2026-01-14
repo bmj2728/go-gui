@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"time"
@@ -11,7 +10,6 @@ import (
 	"github.com/bmj2728/catfetch/pkg/shared/api"
 	"github.com/bmj2728/catfetch/pkg/shared/catdb"
 	"github.com/bmj2728/catfetch/pkg/shared/ui"
-	"go.etcd.io/bbolt"
 )
 
 func main() {
@@ -26,41 +24,6 @@ func main() {
 			log.Default().Println(err)
 		}
 	}(catDB)
-
-	go func() {
-		err := catDB.DB().View(func(tx *bbolt.Tx) error {
-			b := tx.Bucket([]byte("cats"))
-			err := b.ForEachBucket(func(cb []byte) error {
-				c := b.Bucket(cb)
-				err := c.ForEachBucket(func(vb []byte) error {
-					v := c.Bucket(vb)
-					err := v.ForEach(func(k, v []byte) error {
-						if string(k) == "metadata" {
-							fmt.Printf("Key: %s - Value: %s\n", string(k), string(v))
-						} else {
-							fmt.Printf("Key: %s - Value: %vKB\n", string(k), len(v)/1024)
-						}
-						return nil
-					})
-					if err != nil {
-						return err
-					}
-					return nil
-				})
-				if err != nil {
-					return err
-				}
-				return nil
-			})
-			if err != nil {
-				return err
-			}
-			return nil
-		})
-		if err != nil {
-			log.Default().Println(err)
-		}
-	}()
 
 	// Fetch available tags
 	go func() {

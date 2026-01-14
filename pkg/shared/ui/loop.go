@@ -3,6 +3,8 @@ package ui
 import (
 	"image"
 	"image/color"
+	"time"
+
 	//"image"
 	"log"
 
@@ -14,6 +16,7 @@ import (
 	"gioui.org/unit"
 	"gioui.org/widget"
 	"gioui.org/widget/material"
+	"github.com/bmj2728/catfetch/pkg/shared/api"
 	"github.com/bmj2728/catfetch/pkg/shared/catdb"
 	"github.com/bmj2728/catfetch/pkg/shared/catpic"
 )
@@ -25,6 +28,8 @@ func Run(w *app.Window, db *catdb.CatDB) error {
 	var currentImage catpic.CatPic //threadsafe wrapper for image.Image
 	// Ops list
 	var ops op.Ops
+
+	cc := api.NewCatClient(db, 30*time.Second)
 
 	newBg := color.NRGBA{R: 40, G: 42, B: 54, A: 255}
 
@@ -50,7 +55,7 @@ func Run(w *app.Window, db *catdb.CatDB) error {
 			if fetchButton.Clicked(gtx) && !currentImage.IsLoading() {
 				currentImage.SetLoading()
 				go func(wind *app.Window) {
-					img, _, err := HandleButtonClick(db)
+					img, _, err := HandleButtonClick(cc)
 					if err != nil {
 						log.Printf("Error handling button click: %v", err)
 					} else {

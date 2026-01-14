@@ -13,7 +13,6 @@ import (
 const (
 	bucketCats    = "cats"
 	dbKeyMetadata = "metadata"
-	dbKeyData     = "data"
 )
 
 type CatDB struct {
@@ -31,7 +30,7 @@ func OpenDB(path string) (*CatDB, error) {
 		return nil, err
 	}
 
-	return &CatDB{db: db}, nil
+	return cdb, nil
 }
 
 func (c *CatDB) Close() error {
@@ -55,16 +54,13 @@ func (c *CatDB) InitDB() error {
 	})
 }
 
-func (c *CatDB) AddCatVersion(metadata *metadata.CatMetadata, catData []byte) (string, string, error) {
+func (c *CatDB) AddCatVersion(metadata *metadata.CatMetadata, catData []byte) error {
 	catId := metadata.ID
-	versionId, err := hashURL(metadata.URL)
-	if err != nil {
-		return "", "", err
-	}
+	versionKey := metadata.URL
 
-	meta, err := json.Marshal(metadata)
+	dbMeta, err := json.Marshal(metadata.ToCatDBMetadata())
 	if err != nil {
-		return "", "", err
+		return err
 	}
 
 	err = c.db.Update(func(tx *bbolt.Tx) error {
@@ -74,24 +70,24 @@ func (c *CatDB) AddCatVersion(metadata *metadata.CatMetadata, catData []byte) (s
 		if err != nil {
 			return err
 		}
-		version, err := cat.CreateBucketIfNotExists([]byte(versionId))
-		if err != nil {
-			return err
+
+		if cat.Get([]byte(dbKeyMetadata)) == nil {
+			err = cat.Put([]byte(dbKeyMetadata), dbMeta)
+			if err != nil {
+				return err
+			}
 		}
-		err = version.Put([]byte(dbKeyMetadata), meta)
-		if err != nil {
-			return err
-		}
-		err = version.Put([]byte(dbKeyData), catData)
+
+		err = cat.Put([]byte(versionKey), catData)
 		if err != nil {
 			return err
 		}
 		return nil
 	})
 	if err != nil {
-		return "", "", err
+		return err
 	}
-	return catId, versionId, nil
+	return nil
 }
 
 func hashURL(url string) (string, error) {
